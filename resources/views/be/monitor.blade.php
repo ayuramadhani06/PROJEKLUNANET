@@ -48,7 +48,7 @@
           </form>
 
           {{-- BUTTON FILTER --}}
-          <button class="btn btn-sm bg-gradient-info text-nowrap" type="button" data-bs-toggle="collapse" data-bs-target="#columnFilter">
+          <button class="btn btn-sm bg-gradient-info text-nowrap" type="button" data-bs-toggle="collapse" data-bs-target="#columnFilter" style="background: linear-gradient(135deg, #8b0000 0%, #4a0e4e 100%);">
             Filter Column
           </button>
 
