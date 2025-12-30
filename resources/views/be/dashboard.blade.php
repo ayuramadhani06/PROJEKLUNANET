@@ -67,17 +67,18 @@
               </tr>
             </thead>
             <tbody>
-              @foreach($topIps as $ip)
-              <tr>
-                <td class="text-sm text-dark ps-4">
-                  {{ $ip['ip'] }}
-                </td>
-                <td class="text-sm text-end fw-bold pe-4">
-                  {{ number_format($ip['bytes']) }}
-                </td>
-              </tr>
-              @endforeach
+            @foreach($topIps as $ip)
+            <tr>
+              <td class="text-sm text-dark ps-4">
+                {{ $ip->ip }}
+              </td>
+              <td class="text-sm text-end fw-bold pe-4">
+                {{ number_format($ip->bytes) }}
+              </td>
+            </tr>
+            @endforeach
             </tbody>
+
           </table>
         </div>
       </div>
@@ -110,23 +111,24 @@
               </tr>
             </thead>
             <tbody>
-              @foreach($liveFlows as $flow)
-              <tr>
-                <td class="text-sm text-dark ps-4">
-                  {{ $flow['src_ip'] }}
-                </td>
-                <td class="text-sm text-dark">
-                  {{ $flow['dst_ip'] }}
-                </td>
-                <td class="text-sm fw-bold text-center">
-                  {{ $flow['packets'] }}
-                </td>
-                <td class="text-sm text-secondary text-center pe-4">
-                  {{ $flow['dst_hostname'] ?? '-' }}
-                </td>
-              </tr>
-              @endforeach
+            @foreach($liveFlows as $flow)
+            <tr>
+              <td class="text-sm text-dark ps-4">
+                {{ $flow->src_ip }}
+              </td>
+              <td class="text-sm text-dark">
+                {{ $flow->dst_ip }}
+              </td>
+              <td class="text-sm fw-bold text-center">
+                {{ $flow->packets }}
+              </td>
+              <td class="text-sm text-secondary text-center pe-4">
+                {{ $flow->dst_hostname ?? '-' }}
+              </td>
+            </tr>
+            @endforeach
             </tbody>
+
           </table>
         </div>
       </div>
@@ -158,3 +160,4 @@
   });
 </script>
 @endsection
+

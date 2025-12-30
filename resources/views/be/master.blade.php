@@ -7,7 +7,7 @@
   <link rel="apple-touch-icon" sizes="76x76" href="{{ asset('be/img/apple-icon.png') }}">
   <link rel="icon" type="image/png" href="{{ asset('be/img/favicon.png') }}">
 
-  <title>@yield('title', 'Dashboard')</title>
+  <title>@yield('title', 'Monitoring')</title>
 
   {{-- Fonts & Icons --}}
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />

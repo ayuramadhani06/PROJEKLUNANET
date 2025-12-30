@@ -19,36 +19,88 @@
           </p>
         </div>
 
-        {{-- BUTTON FILTER --}}
-        <button class="btn btn-sm bg-gradient-info"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#columnFilter">
-          Filter / Select Column
-        </button>
+        <div class="d-flex align-items-center gap-3">
+          {{-- SELECT JUMLAH BARIS --}}
+          <form method="GET" class="d-flex align-items-center gap-2 mb-3">
+            <span class="text-xs text-secondary">Rows</span>
+
+            <input type="hidden" name="search" value="{{ request('search') }}">
+
+            @foreach((array) request('columns', []) as $col)
+              <input type="hidden" name="columns[]" value="{{ $col }}">
+            @endforeach
+
+            @if(request('open_filter'))
+              <input type="hidden" name="open_filter" value="1">
+            @endif
+
+            <input type="number"
+                  name="per_page"
+                  value="{{ $perPage }}"
+                  min="1"
+                  max="500"
+                  class="form-control form-control-sm"
+                  style="width: 90px"
+                  onchange="this.form.submit()">
+          </form>
+
+
+          {{-- BUTTON FILTER --}}
+          <button class="btn btn-sm bg-gradient-info"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#columnFilter">
+            Filter / Select Column
+          </button>
+
+          {{-- INFO AUTO REFRESH --}}
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <span class="badge bg-success rounded-circle"
+                  style="width:8px;height:8px;padding:0;"></span>
+            <span class="text-xs text-secondary">
+              Auto refresh active (5 min)
+            </span>
+          </div>
+
+        </div>
       </div>
 
       {{-- ================= CHECKBOX FILTER ================= --}}
-      <div class="collapse" id="columnFilter">
+      <div class="collapse {{ request('open_filter') ? 'show' : '' }}" id="columnFilter">
         <div class="card-body pt-3">
-          <div class="row">
-            @foreach($allColumns as $col)
-              <div class="col-md-3 col-sm-6">
-                <div class="form-check form-switch form-check-info mb-2">
-                    <input class="form-check-input column-toggle"
-                            type="checkbox"
-                            value="{{ $col }}"
-                            id="chk-{{ $col }}">
+
+          <form method="GET" action="{{ route('traffic.index') }}" id="columnForm">
+
+            <input type="hidden" name="search" value="{{ request('search') }}">
+            <input type="hidden" name="per_page" value="{{ request('per_page', $perPage) }}">
+            <input type="hidden" name="open_filter" value="1">
+
+            <div class="row">
+              @foreach($allColumns as $col)
+                <div class="col-md-3 col-sm-6">
+                  <div class="form-check form-switch form-check-info mb-2">
+                    <input
+                      class="form-check-input column-toggle"
+                      type="checkbox"
+                      name="columns[]"
+                      value="{{ $col }}"
+                      id="chk-{{ $col }}"
+                      {{ in_array($col, $selectedColumns ?? []) ? 'checked' : '' }}
+                    >
                     <label class="form-check-label text-sm text-dark"
-                            for="chk-{{ $col }}">
-                        {{ strtoupper(str_replace('_',' ', $col)) }}
+                          for="chk-{{ $col }}">
+                      {{ strtoupper(str_replace('_',' ', $col)) }}
                     </label>
+                  </div>
                 </div>
-              </div>
-            @endforeach
-          </div>
+              @endforeach
+            </div>
+          </form>
+
+
         </div>
       </div>
+
 
     </div>
   </div>
@@ -73,7 +125,8 @@
 
                 {{-- OPTIONAL COLUMN --}}
                 @foreach($allColumns as $col)
-                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder d-none optional-col"
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder optional-col
+                      {{ in_array($col, $selectedColumns ?? []) ? '' : 'd-none' }}"
                       data-col="{{ $col }}">
                     {{ strtoupper(str_replace('_',' ', $col)) }}
                   </th>
@@ -82,25 +135,29 @@
             </thead>
 
             <tbody>
-              @foreach($flows as $flow)
-              <tr>
-                {{-- DEFAULT --}}
-                @foreach($defaultColumns as $col)
-                  <td class="text-sm font-monospace">
-                    {{ $flow[$col] ?? '-' }}
-                  </td>
-                @endforeach
+            @foreach($flows as $flow)
+            <tr>
 
-                {{-- OPTIONAL --}}
-                @foreach($allColumns as $col)
-                  <td class="text-sm d-none optional-col"
-                      data-col="{{ $col }}">
-                    {{ $flow[$col] ?? '-' }}
-                  </td>
-                @endforeach
-              </tr>
+              {{-- DEFAULT --}}
+              @foreach($defaultColumns as $col)
+                <td class="text-sm font-monospace">
+                  {{ $flow->$col ?? '-' }}
+                </td>
               @endforeach
+
+              {{-- OPTIONAL --}}
+              @foreach($allColumns as $col)
+                <td class="text-sm optional-col
+                    {{ in_array($col, $selectedColumns ?? []) ? '' : 'd-none' }}"
+                    data-col="{{ $col }}">
+                  {{ $flow->$col ?? '-' }}
+                </td>
+              @endforeach
+
+            </tr>
+            @endforeach
             </tbody>
+
 
           </table>
 
@@ -114,16 +171,27 @@
 
 @section('script')
 <script>
-  document.querySelectorAll('.column-toggle').forEach(cb => {
-    cb.addEventListener('change', function () {
-      const col = this.value;
+  // AUTO REFRESH (5 MENIT)
+  setTimeout(function () {
+      window.location.reload();
+  }, 300000); // 5 menit
 
-      document
-        .querySelectorAll(`[data-col="${col}"]`)
-        .forEach(el => {
-          el.classList.toggle('d-none', !this.checked);
-        });
+
+  //COLUMN TOGGLE
+   document.querySelectorAll('.column-toggle').forEach(cb => {
+    cb.addEventListener('change', function () {
+
+      // tambahkan flag agar collapse tetap kebuka
+      let form = document.getElementById('columnForm');
+
+      let flag = document.createElement('input');
+      flag.type = 'hidden';
+      flag.name = 'open_filter';
+      flag.value = '1';
+      form.appendChild(flag);
+
+      form.submit();
     });
-  });
+  }); 
 </script>
 @endsection

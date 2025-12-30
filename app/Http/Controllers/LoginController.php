@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+ 
 
 class LoginController extends Controller
 {
@@ -13,20 +15,34 @@ class LoginController extends Controller
 
     public function process(Request $request)
     {
-        // dummy login dulu
-        if ($request->email === 'admin@mail.com' && $request->password === 'admin') {
-            session(['logged_in' => true]);
-            return redirect()->route('dashboard');
+        $credentials = $request->validate([
+            'email'    => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $request->session()->regenerate();
+
+            $user = Auth::user();
+
+            //LANGSUNG KE DASHBOARD
+            return redirect()->route('dashboard', [
+                'username' => $user->username
+            ]);
         }
 
         return back()->withErrors([
-            'email' => 'Email atau password salah'
-        ]);
+            'email' => 'Email atau password salah',
+        ])->onlyInput('email');
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
-        session()->forget('logged_in');
-        return redirect()->route('login');
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/');
     }
 }
+
