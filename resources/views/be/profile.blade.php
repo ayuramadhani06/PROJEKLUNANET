@@ -7,28 +7,17 @@
 
 @section('content')
 <div class="container-fluid py-4">
-
+    
     <div class="card">
         <div class="card-header pb-0">
             <ul class="nav nav-tabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active"
-                            id="profile-tab"
-                            data-bs-toggle="tab"
-                            data-bs-target="#profile"
-                            type="button"
-                            role="tab">
+                <li class="nav-item">
+                    <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab">
                         Profile Information
                     </button>
                 </li>
-
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link"
-                            id="security-tab"
-                            data-bs-toggle="tab"
-                            data-bs-target="#security"
-                            type="button"
-                            role="tab">
+                <li class="nav-item">
+                    <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab">
                         Privacy & Security
                     </button>
                 </li>
@@ -40,55 +29,27 @@
 
                 {{-- TAB INFORMASI PROFIL --}}
                 <div class="tab-pane fade show active" id="profile" role="tabpanel">
-                    <form>
-                        <div class="row">
-
-                            {{-- FOTO --}}
-                            <div class="col-md-4 text-center">
-                                <img src="{{ asset('be/img/default-avatar.png') }}"
-                                     class="img-fluid rounded mb-3"
-                                     style="max-width:200px">
-
-                                <button type="button" class="btn btn-info btn-sm w-100">
-                                    Upload Foto 
-                                </button>
-
-                                <small class="text-muted d-block mt-2">
-                                    Max 2MB · JPG, PNG, WEBP
-                                </small>
-                            </div>
-
-                            {{-- DATA --}}
-                            <div class="col-md-8">
+                    <form id="formUpdateProfile" action="{{ route('profile.update') }}" method="POST">
+                        @csrf
+                        <div class="row justify-content-center">
+                            <div class="col-md-10">
                                 <div class="table-responsive">
                                     <table class="table table-borderless align-middle">
                                         <tbody>
-
-                                        <tr>
-                                            <th width="30%">Name</th>
-                                            <td>
-                                                <input type="text" class="form-control"
-                                                       placeholder="Enter your name">
-                                            </td>
-                                        </tr>
-
-                                        <tr>
-                                            <th>Email</th>
-                                            <td>
-                                                <input type="email" class="form-control"
-                                                       placeholder="example@gmail.com">
-                                            </td>
-                                        </tr>
+                                            <tr>
+                                                <th width="30%">Name</th>
+                                                <td><input type="text" name="name" class="form-control" value="{{ Auth::user()->name }}" required></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Email</th>
+                                                <td><input type="email" name="email" class="form-control" value="{{ Auth::user()->email }}" required></td>
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
-
                                 <div class="text-end mt-3">
-                                    <button type="button" class="btn btn-info">
-                                        Save Changes
-                                    </button>
+                                    <button type="button" onclick="confirmSubmit('formUpdateProfile')" class="btn btn-info">Save Changes</button>
                                 </div>
-
                             </div>
                         </div>
                     </form>
@@ -96,48 +57,80 @@
 
                 {{-- TAB PRIVASI & KEAMANAN --}}
                 <div class="tab-pane fade" id="security" role="tabpanel">
-                    <form>
-                        <div class="table-responsive">
-                            <table class="table table-borderless align-middle">
-                                <tbody>
-
-                                <tr>
-                                    <th width="30%">Old Password</th>
-                                    <td>
-                                        <div class="position-relative">
-                                            <input type="password" class="form-control" id="oldPassword"
-                                                placeholder="Enter your old password">
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <th>New Password</th>
-                                    <td>
-                                        <div class="position-relative">
-                                            <input type="password" class="form-control" id="newPassword"
-                                                placeholder="Enter your new password">
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="text-end mt-3">
-                            <button type="button" class="btn btn-info">
-                                Update Password
-                            </button>
+                    <form id="formUpdatePassword" action="{{ route('profile.password') }}" method="POST">
+                        @csrf
+                        <div class="row justify-content-center">
+                            <div class="col-md-10">
+                                <div class="table-responsive">
+                                    <table class="table table-borderless align-middle">
+                                        <tbody>
+                                            <tr>
+                                                <th width="30%">Old Password</th>
+                                                <td><input type="password" name="old_password" class="form-control" required></td>
+                                            </tr>
+                                            <tr>
+                                                <th>New Password</th>
+                                                <td><input type="password" name="password" class="form-control" required></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Confirm New Password</th>
+                                                <td><input type="password" name="password_confirmation" class="form-control" required></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="text-end mt-3">
+                                    <button type="button" onclick="confirmSubmit('formUpdatePassword')" class="btn btn-info">Update Password</button>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
-
             </div>
         </div>
     </div>
-
 </div>
-@endsection
 
+{{-- SCRIPT SWEETALERT2 --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    // 1. Alert Konfirmasi "Are you sure?"
+    function confirmSubmit(formId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to save the changes?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#11cdef', // Warna Info
+            cancelButtonColor: '#f5365c', // Warna Danger
+            confirmButtonText: 'Yes, Save it!',
+            cancelButtonText: 'No, Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById(formId).submit();
+            }
+        })
+    }
+
+    // 2. Alert Berhasil (Jika ada session success)
+    @if(session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: "{{ session('success') }}",
+            timer: 2000,
+            showConfirmButton: false
+        });
+    @endif
+
+    // 3. Alert Gagal (Jika ada error validasi)
+    @if($errors->any())
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: "{{ $errors->first() }}",
+        });
+    @endif
+</script>
+@endsection

@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
- 
 
 class LoginController extends Controller
 {
     public function index()
     {
+        // Kalau sudah login, jangan kasih halaman login lagi, lariin ke dashboard
+        if (Auth::check()) {
+            return redirect()->route('dashboard');
+        }
         return view('be.login');
     }
 
@@ -22,17 +25,11 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-
-            $user = Auth::user();
-
-            //LANGSUNG KE DASHBOARD
-            return redirect()->route('dashboard', [
-                'username' => $user->username
-            ]);
+            return redirect()->route('dashboard');
         }
 
         return back()->withErrors([
-            'email' => 'Email atau password salah',
+            'email' => 'Email atau password salah.',
         ])->onlyInput('email');
     }
 
@@ -45,4 +42,3 @@ class LoginController extends Controller
         return redirect('/');
     }
 }
-

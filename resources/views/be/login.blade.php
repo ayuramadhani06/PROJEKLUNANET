@@ -34,6 +34,11 @@
               </div>
 
               <div class="card-body">
+                @if($errors->any())
+                    <div class="alert alert-danger text-white text-sm py-2">
+                        {{ $errors->first() }}
+                    </div>
+                @endif
                 <form method="POST" action="{{ route('login.process') }}">
                   @csrf
 

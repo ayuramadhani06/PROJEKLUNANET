@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{
     DashboardController,
     LoginController,
@@ -7,15 +8,16 @@ use App\Http\Controllers\{
     ProfileController
 };
 
+// --- Halaman Public ---
 Route::get('/', [LoginController::class, 'index'])->name('login');
 Route::post('/login', [LoginController::class, 'process'])->name('login.process');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->name('dashboard');
-
-Route::get('/traffic', [TrafficFlowController::class, 'index'])
-    ->name('traffic.index');
-
-Route::get('/profile', [ProfileController::class, 'index'])
-    ->name('profile.index');
-
+// --- Halaman Private (Harus Login) ---
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/traffic', [TrafficFlowController::class, 'index'])->name('traffic.index');
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::post('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+});
