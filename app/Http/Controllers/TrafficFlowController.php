@@ -109,7 +109,7 @@ class TrafficFlowController extends Controller
             51 => 'AH',
             58 => 'ICMPv6',
             89 => 'OSPF',
-            // tambahkan protokol lain sesuai kebutuhan
+            // tambahkan protokol lain sesuai kebutuhan (kalau memang ada lagi)
         ];
 
         // --- CONVERT BYTES TO HUMAN READABLE ---

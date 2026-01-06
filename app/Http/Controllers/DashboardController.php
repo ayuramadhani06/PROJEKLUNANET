@@ -110,4 +110,32 @@ class DashboardController extends Controller
             'protocols'
         ));
     }
+
+    //Ini untuk live stats via AJAX 
+    public function getLiveStats()
+    {
+        $now = \Carbon\Carbon::now();
+        $lastMinute = $now->copy()->subMinute();
+        $last5Min   = $now->copy()->subMinutes(5);
+
+        // Hitung Stats Real-time
+        $activeIps = DB::table('netflow_data')->where('time', '>=', $last5Min)->distinct('src_ip')->count('src_ip');
+        $totalPacketsRaw = DB::table('netflow_data')->where('time', '>=', $lastMinute)->sum('packets') ?: 0;
+        $pps = round($totalPacketsRaw / 60);
+        $activeFlows = DB::table('netflow_data')->where('time', '>=', $last5Min)->count();
+
+        // Total Traffic (Human Format)
+        $totalBytes = DB::table('netflow_summary')->sum('bytes') ?: 0;
+        $totalTrafficHuman = ($totalBytes >= 1073741824) 
+            ? round($totalBytes / 1073741824, 2) . ' GB' 
+            : round($totalBytes / 1048576, 2) . ' MB';
+
+        return response()->json([
+            'activeIps'    => number_format($activeIps),
+            'totalPackets' => number_format($totalPacketsRaw),
+            'totalTraffic' => $totalTrafficHuman,
+            'pps'          => number_format($pps),
+            'activeFlows'  => number_format($activeFlows),
+        ]);
+    }
 }

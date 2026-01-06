@@ -45,10 +45,14 @@
   <script src="{{ asset('be/js/plugins/perfect-scrollbar.min.js') }}"></script>
   <script src="{{ asset('be/js/plugins/smooth-scrollbar.min.js') }}"></script>
   <script src="{{ asset('be/js/plugins/chartjs.min.js') }}"></script>
+  {{-- script getLiveStats --}}
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+  {{-- JS CORE --}}
+  <script src="{{ asset('be/js/soft-ui-dashboard.min.js?v=1.0.3') }}"></script>
 
   {{-- PAGE SCRIPT --}}
   @yield('script')
 
-  <script src="{{ asset('be/js/soft-ui-dashboard.min.js?v=1.0.3') }}"></script>
 </body>
 </html>

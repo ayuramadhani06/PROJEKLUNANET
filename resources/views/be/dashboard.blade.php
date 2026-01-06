@@ -20,11 +20,11 @@
 
         <div class="d-flex gap-4 text-center">
           <div>
-            <h5 class="mb-0 fw-bold text-white">{{ $activeIps ?? 0 }}</h5>
+            <h5 id="live-active-ips" class="mb-0 fw-bold text-white">{{ $activeIps ?? 0 }}</h5>
             <span class="text-xs opacity-7">Active IPs</span>
           </div>
           <div class="border-start ps-3">
-            <h5 class="mb-0 fw-bold text-white">{{ number_format($totalPackets ?? 0) }}</h5>
+            <h5 id="live-packets" class="mb-0 fw-bold text-white">{{ number_format($totalPackets ?? 0) }}</h5>
             <span class="text-xs opacity-7">Packets</span>
           </div>
         </div>
@@ -38,21 +38,21 @@
   <div class="col-md-4 mb-3">
     <div class="card"><div class="card-body">
       <p class="text-sm mb-1">Total Traffic</p>
-      <h5 class="fw-bold">{{ $totalTrafficHuman ?? '0 MB' }}</h5>
+      <h5 id="live-total-traffic" class="fw-bold">{{ $totalTrafficHuman ?? '0 MB' }}</h5>
     </div></div>
   </div>
 
   <div class="col-md-4 mb-3">
     <div class="card"><div class="card-body">
       <p class="text-sm mb-1">Packets / sec</p>
-      <h5 class="fw-bold">{{ $pps ?? 0 }}</h5>
+      <h5 id="live-pps" class="fw-bold">{{ $pps ?? 0 }}</h5>
     </div></div>
   </div>
 
   <div class="col-md-4 mb-3">
     <div class="card"><div class="card-body">
       <p class="text-sm mb-1">Active Flows</p>
-      <h5 class="fw-bold">{{ $activeFlows ?? 0 }}</h5>
+      <h5 id="live-flows" class="fw-bold">{{ $activeFlows ?? 0 }}</h5>
     </div></div>
   </div>
 </div>
@@ -179,6 +179,7 @@ if (trafficCtx) {
     data: {
       labels: {!! json_encode($chartLabels ?? []) !!},
       datasets: [{
+        label: 'Total Traffic (Bytes)',
         data: {!! json_encode($chartData ?? []) !!},
         borderColor: '#8b0000',
         backgroundColor: 'rgba(139,0,0,0.15)',
@@ -221,6 +222,38 @@ if (donutCtx) {
     }
   });
 }
+
+
+function updateDashboardStats() {
+    $.ajax({
+        url: "{{ route('dashboard.stats') }}",
+        method: 'GET',
+        success: function(data) {
+            // Update elemen berdasarkan ID
+            $('#live-active-ips').text(data.activeIps);
+            $('#live-packets').text(data.totalPackets);
+            $('#live-total-traffic').text(data.totalTraffic);
+            $('#live-pps').text(data.pps);
+            $('#live-flows').text(data.activeFlows);
+            
+            console.log("Stats Updated: " + new Date().toLocaleTimeString());
+        },
+        error: function(err) {
+            console.error("Gagal ambil data live stats", err);
+        }
+    });
+}
+
+// Jalankan tiap 5 detik (5000 ms)
+setInterval(updateDashboardStats, 5000);
+
+// Panggil sekali saat halaman baru di-load biar gak nunggu 5 detik pertama
+$(document).ready(function() {
+    updateDashboardStats();
+});
 </script>
+
+
+
 @endsection
 
