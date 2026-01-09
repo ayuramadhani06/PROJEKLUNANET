@@ -65,6 +65,9 @@
   <li class="nav-item">
     <button class="nav-link" data-bs-toggle="tab" data-bs-target="#protocols">Protocols</button>
   </li>
+  <li class="nav-item">
+    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#interfaces">Interfaces</button>
+  </li>
 </ul>
 
 <div class="tab-content">
@@ -166,6 +169,80 @@
   </div>
 </div>
 
+{{-- ================= INTERFACES ================= --}}
+<div class="tab-pane fade" id="interfaces">
+  <div class="row">
+    <div class="col-12 mb-3">
+      <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center bg-light">
+          <h6 class="mb-0">Interface Traffic History</h6>
+          <div class="d-flex gap-2">
+            <select id="select-time-range" class="form-select form-select-sm" style="width: 150px;">
+                <option value="5m" selected>Last 5 Minutes</option>
+                <option value="15m">Last 15 Minutes</option>
+                <option value="30m">Last 30 Minutes</option>
+                <option value="1h">Last 1 Hour</option>
+                <option value="3h">Last 3 Hours</option>
+                <option value="6h">Last 6 Hours</option>
+                <option value="12h">Last 12 Hours</option>
+                <option value="1d">Last 1 Day</option>
+                <option value="7d">last week</option>
+
+            </select>
+            <select id="select-interface" class="form-select form-select-sm" style="width: 200px;">
+                <option value="">-- Select Interface --</option>
+                @foreach($interfaceList as $iface)
+                    @php
+                        // Pastikan kita mengambil property yang benar
+                        $currentValue = $iface->if_name ?? ''; 
+                        $currentDisplay = $iface->if_name_display ?? $currentValue;
+                    @endphp
+                    <option value="{{ $currentValue }}">{{ $currentDisplay }}</option>
+                @endforeach
+            </select>
+          </div>
+        </div>
+        <div class="card-body">
+          <div style="height: 400px; position: relative;">
+            <canvas id="chart-interface-zabbix"></canvas>
+          </div>
+          
+          {{-- Legend Style --}}
+          <div class="table-responsive mt-4">
+            <table class="table table-sm text-center border">
+              <thead class="bg-light text-xs">
+                <tr>
+                  <th>Description</th>
+                  <th>Last</th>
+                  <th>Min</th>
+                  <th>Avg</th>
+                  <th>Max</th>
+                </tr>
+              </thead>
+              <tbody class="text-sm" id="zabbix-legend-body">
+                <tr>
+                  <td class="text-start"><span class="badge" style="background:#16a34a">&nbsp;</span> Inbound Traffic</td>
+                  <td id="in-last">-</td>
+                  <td id="in-min">-</td>
+                  <td id="in-avg">-</td>
+                  <td id="in-max">-</td>
+                </tr>
+                <tr>
+                  <td class="text-start"><span class="badge" style="background:#2563eb">&nbsp;</span> Outbound Traffic</td>
+                  <td id="out-last">-</td>
+                  <td id="out-min">-</td>
+                  <td id="out-avg">-</td>
+                  <td id="out-max">-</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </div>
 @endsection
 
@@ -250,6 +327,125 @@ setInterval(updateDashboardStats, 5000);
 // Panggil sekali saat halaman baru di-load biar gak nunggu 5 detik pertama
 $(document).ready(function() {
     updateDashboardStats();
+});
+
+
+/* ================= INTERFACE CHART & AUTO UPDATE ================= */
+const zabbixCtx = document.getElementById('chart-interface-zabbix');
+let zabbixChart;
+
+// 1. Inisialisasi Grafik (Kosong dulu)
+if (zabbixCtx) {
+    zabbixChart = new Chart(zabbixCtx, {
+        type: 'line',
+        data: {
+            labels: [], 
+            datasets: [
+                {
+                    label: 'Incoming',
+                    data: [],
+                    borderColor: '#16a34a',
+                    backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                    fill: true,
+                    tension: 0.1,
+                    pointRadius: 0,
+                    borderWidth: 2
+                },
+                {
+                    label: 'Outgoing',
+                    data: [],
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    fill: true,
+                    tension: 0.1,
+                    pointRadius: 0,
+                    borderWidth: 2
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Bytes' },
+                    ticks: {
+                        callback: function(value) { return formatBytes(value); }
+                    }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+}
+
+// 2. Fungsi untuk Mengambil Data Grafik Terbaru (Live)
+function updateInterfaceChart() {
+    const ifName = $('#select-interface').val();
+    const timeRange = $('#select-time-range').val();
+    
+    if(!ifName) return;
+
+    $.ajax({
+        url: "{{ route('interface.history') }}",
+        data: { if_name: ifName, range: timeRange },
+        success: function(res) {
+            if (zabbixChart) {
+                zabbixChart.data.labels = res.labels;
+                zabbixChart.data.datasets[0].data = res.rx_data;
+                zabbixChart.data.datasets[1].data = res.tx_data;
+                zabbixChart.update('none'); // Update tanpa animasi kasar
+
+                // Update Legend Tabel
+                $('#in-last').text(formatBytes(res.stats.in_last));
+                $('#in-min').text(formatBytes(res.stats.in_min));
+                $('#in-avg').text(formatBytes(res.stats.in_avg));
+                $('#in-max').text(formatBytes(res.stats.in_max));
+
+                $('#out-last').text(formatBytes(res.stats.out_last));
+                $('#out-min').text(formatBytes(res.stats.out_min));
+                $('#out-avg').text(formatBytes(res.stats.out_avg));
+                $('#out-max').text(formatBytes(res.stats.out_max));
+            }
+        }
+    });
+}
+
+// 3. Gabungkan Timer: Update Stats Atas & Update Grafik Interface
+setInterval(function() {
+    updateDashboardStats(); // Fungsi yang sudah ada di atas
+    updateInterfaceChart();  // Fungsi baru ini
+}, 5000);
+
+// 4. Event Handler Dropdown
+$('#select-interface, #select-time-range').on('change', function() {
+    updateInterfaceChart();
+});
+
+// 5. Fungsi Bantu Format Bytes (Taruh paling bawah)
+function formatBytes(bytes, decimals = 2) {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
+// 6. Jalankan saat Ready
+$(document).ready(function() {
+    updateDashboardStats();
+    
+    // Auto-select interface pertama
+    const firstInterface = $('#select-interface option:eq(1)').val();
+    if (firstInterface) {
+        $('#select-interface').val(firstInterface);
+        updateInterfaceChart();
+    }
 });
 </script>
 

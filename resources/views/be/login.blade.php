@@ -28,7 +28,7 @@
 
               <div class="card-header pb-0 text-left bg-transparent">
                 <h3 class="font-weight-bolder text-info text-gradient">
-                  Welcome back
+                  Welcome
                 </h3>
                 <p class="mb-0">Sign in to continue</p>
               </div>

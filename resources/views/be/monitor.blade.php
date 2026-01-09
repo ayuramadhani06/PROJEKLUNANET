@@ -54,7 +54,7 @@
 
           {{-- SELECT AUTO REFRESH (TANPA ICON LOADING) --}}
           <div class="d-flex align-items-center">
-            <select class="form-control form-control-sm" id="refresh-interval" style="width: 130px;">
+            <select class="form-select form-select-sm" id="refresh-interval" style="width: 130px;">
                 <option value="0">Refresh: Off</option>
                 <option value="10000">10 Seconds</option>
                 <option value="30000">30 Seconds</option>

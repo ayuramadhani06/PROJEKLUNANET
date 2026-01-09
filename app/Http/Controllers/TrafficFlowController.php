@@ -39,7 +39,7 @@ class TrafficFlowController extends Controller
             'tcp_window_size','icmp_type','igmp_type','ipv6_flow_label',
             'is_multicast','src_mac','dst_mac','src_mask','dst_mask',
             'nat_src_ip','nat_dst_ip','nat_src_port','nat_dst_port',
-            'dst_hostname','dst_asn','dst_isp','time',
+            'dst_hostname','dst_asn','dst_org','time',
         ];
 
         //session presistence
@@ -88,7 +88,7 @@ class TrafficFlowController extends Controller
                   ->orWhere('dst_ip', 'like', "%{$search}%")
                   ->orWhere('protocol', 'like', "%{$search}%")
                   ->orWhere('dst_hostname', 'like', "%{$search}%")
-                  ->orWhere('dst_isp', 'like', "%{$search}%");
+                  ->orWhere('dst_org', 'like', "%{$search}%");
             });
         }
 
