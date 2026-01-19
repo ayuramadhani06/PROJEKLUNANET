@@ -48,7 +48,7 @@
                                     </table>
                                 </div>
                                 <div class="text-end mt-3">
-                                    <button type="button" onclick="confirmSubmit('formUpdateProfile')" class="btn btn-info">Save Changes</button>
+                                    <button type="button" onclick="confirmSubmit('formUpdateProfile')" class="btn btn-info" style="background: linear-gradient(135deg, #8b0000 0%, #4a0e4e 100%);">Save Changes</button>
                                 </div>
                             </div>
                         </div>
@@ -80,7 +80,7 @@
                                     </table>
                                 </div>
                                 <div class="text-end mt-3">
-                                    <button type="button" onclick="confirmSubmit('formUpdatePassword')" class="btn btn-info">Update Password</button>
+                                    <button type="button" onclick="confirmSubmit('formUpdatePassword')" class="btn btn-info" style="background: linear-gradient(135deg, #8b0000 0%, #4a0e4e 100%);">Update Password</button>
                                 </div>
                             </div>
                         </div>
@@ -102,8 +102,8 @@
             text: "Do you want to save the changes?",
             icon: 'question',
             showCancelButton: true,
-            confirmButtonColor: '#11cdef', // Warna Info
-            cancelButtonColor: '#f5365c', // Warna Danger
+            confirmButtonColor: '#8b0000', // Warna Info
+            cancelButtonColor: '#8392ab', // Warna Danger
             confirmButtonText: 'Yes, Save it!',
             cancelButtonText: 'No, Cancel'
         }).then((result) => {

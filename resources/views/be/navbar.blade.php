@@ -64,7 +64,7 @@
                 <hr class="horizontal dark mt-0">
                 <li>
                   <a class="dropdown-item border-radius-md text-danger" href="javascript:;" 
-                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                    onclick="confirmLogout()">
                     <div class="d-flex py-1">
                       <div class="my-auto">
                         <i class="fa fa-sign-out me-3 text-danger"></i>
@@ -101,23 +101,39 @@
             </li>
 
             {{-- NOTIFICATION DROPDOWN (Lu bisa biarin isinya kalau mau ada notif dummy) --}}
+            @php
+                $dbConnected = false;
+                try {
+                    // Cek koneksi ke Postgres
+                    \DB::connection()->getPdo();
+                    $dbConnected = true;
+                } catch (\Exception $e) {
+                    $dbConnected = false;
+                }
+            @endphp
+
             <li class="nav-item dropdown pe-2 d-flex align-items-center">
               <a href="javascript:;" class="nav-link text-body p-0" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fa fa-bell cursor-pointer"></i>
+                {{-- Ikon lonceng akan berwarna hijau jika konek, merah jika mati --}}
+                <i class="fa fa-bell cursor-pointer {{ $dbConnected ? 'text-success' : 'text-danger' }}"></i>
               </a>
               <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton">
                 <li class="mb-2">
                   <a class="dropdown-item border-radius-md" href="javascript:;">
                     <div class="d-flex py-1">
                       <div class="my-auto">
-                        <img src="{{asset('be/img/team-2.jpg')}}" class="avatar avatar-sm me-3 ">
+                        {{-- Icon Database --}}
+                        <div class="avatar avatar-sm {{ $dbConnected ? 'bg-gradient-success' : 'bg-gradient-danger' }}  me-3">
+                          <i class="fa fa-database" style="margin-top: 10px;"></i>
+                        </div>
                       </div>
                       <div class="d-flex flex-column justify-content-center">
                         <h6 class="text-sm font-weight-normal mb-1">
-                          <span class="font-weight-bold">System Online</span>
+                          <span class="font-weight-bold">{{ $dbConnected ? 'System Online' : 'Database Offline' }}</span>
                         </h6>
                         <p class="text-xs text-secondary mb-0">
-                          Connected to Postgres Server
+                          <i class="fa fa-plug me-1"></i>
+                          {{ $dbConnected ? 'Successfully connected to PostgreSQL' : 'Check your database connection!' }}
                         </p>
                       </div>
                     </div>
@@ -129,3 +145,25 @@
         </div>
       </div>
     </nav>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+function confirmLogout() {
+    Swal.fire({
+        title: 'Are you sure want to logout?',
+        text: "Your session will be ended here!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#8b0000', // Warna pink ala Soft UI Dashboard
+        cancelButtonColor: '#8392ab',
+        confirmButtonText: 'Yes, logout!',
+        cancelButtonText: 'No, stay logged in'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Kalau user klik "Ya", submit form logout-nya
+            document.getElementById('logout-form').submit();
+        }
+    })
+}
+</script>

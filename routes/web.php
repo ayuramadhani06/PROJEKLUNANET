@@ -5,7 +5,8 @@ use App\Http\Controllers\{
     DashboardController,
     LoginController,
     TrafficFlowController,
-    ProfileController
+    ProfileController,
+    NotificationController
 };
 
 // --- Halaman Public ---
@@ -25,5 +26,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::post('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
     Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+
+    //notifications
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    // Mark as read
+    Route::get('/notifications/read/{id}', [NotificationController::class, 'markAsRead'])->name('notifications.read');
 
 });
