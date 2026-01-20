@@ -6,7 +6,8 @@ use App\Http\Controllers\{
     LoginController,
     TrafficFlowController,
     ProfileController,
-    NotificationController
+    NotificationController,
+    ReportController
 };
 
 // --- Halaman Public ---
@@ -31,5 +32,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     // Mark as read
     Route::get('/notifications/read/{id}', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::get('/report/download', [App\Http\Controllers\ReportController::class, 'downloadPDF'])->name('report.pdf');
 
 });

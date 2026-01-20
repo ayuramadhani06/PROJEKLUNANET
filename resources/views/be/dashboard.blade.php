@@ -16,6 +16,11 @@
         <div>
           <h4 class="mb-1 fw-bold text-white">Dashboard</h4>
           <p class="text-sm mb-0 opacity-8">Advanced NetFlow monitoring</p>
+          <div class="mt-3">
+              <a href="{{ route('report.pdf') }}" id="btn-export-pdf" class="btn btn-sm btn-light text-dark fw-bold shadow-sm" style="border-radius: 8px;">
+                  <i class="fas fa-file-pdf me-1 text-danger"></i> Export Traffic Report
+              </a>
+          </div>
         </div>
 
         <div class="d-flex gap-4 text-center">
@@ -445,6 +450,24 @@ $(document).ready(function() {
     if (firstInterface) {
         $('#select-interface').val(firstInterface);
         updateInterfaceChart();
+    }
+});
+
+
+// Gunakan ID #btn-export-pdf agar tidak bentrok dengan elemen lain
+$('#btn-export-pdf').on('click', function(e) {
+    try {
+        let btn = $(this);
+        let originalText = btn.html();
+        
+        btn.addClass('disabled').html('<i class="fas fa-spinner fa-spin me-1"></i> Generating PDF...');
+        
+        // Kembalikan tombol ke normal setelah 5 detik
+        setTimeout(function() {
+            btn.removeClass('disabled').html(originalText);
+        }, 5000);
+    } catch (err) {
+        console.error("Export PDF Button Error: ", err);
     }
 });
 </script>

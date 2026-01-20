@@ -19,6 +19,7 @@ class DashboardController extends Controller
         $totalTrafficHuman = $this->formatBytes($totalBytes);
 
         // --- 2. STATS REAL-TIME ---
+        // wild take away and through again ill be pusi=hing all day says and bring all the chaces to here
         $last5Min = $now->copy()->subMinutes(5);
         $activeIps = DB::table('netflow_data')->where('time', '>=', $last5Min)->distinct('src_ip')->count('src_ip');
         $totalPacketsLastMin = DB::table('netflow_data')->where('time', '>=', $now->copy()->subMinute())->sum('packets') ?: 0;
@@ -105,9 +106,9 @@ class DashboardController extends Controller
                 ->orderBy('time_bucket', 'ASC')->get();
         } 
         else { // 7d
-            $history = DB::table('agg_interface_daily')
+            $history = DB::table('view_interface_stats_1d') // Pakai view_interface_stats_1d
                 ->select('time_bucket as bucket', 'rx_bytes as rx', 'tx_bytes as tx')
-                ->whereRaw("TRIM(if_name) = ?", [$ifName])
+                ->where('if_name', $ifName)
                 ->where('time_bucket', '>=', $now->copy()->subDays(7))
                 ->orderBy('time_bucket', 'ASC')->get();
         }
@@ -127,7 +128,7 @@ class DashboardController extends Controller
         ]);
     }
 
-    // Fungsi pembantu lainnya (formatBytes & calculateStats) tetap sama...
+    // Fungsi pembantu lainnya (formatBytes & calculateStats) sama dengan sebelumnya
     private function formatBytes($bytes, $precision = 2) {
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];
         $bytes = max($bytes, 0);
