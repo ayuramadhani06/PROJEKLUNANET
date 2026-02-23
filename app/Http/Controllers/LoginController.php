@@ -4,16 +4,20 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie; // Tambahkan ini
 
 class LoginController extends Controller
 {
     public function index()
     {
-        // Kalau sudah login, jangan kasih halaman login lagi, lariin ke dashboard
         if (Auth::check()) {
             return redirect()->route('dashboard');
         }
-        return view('be.login');
+
+        // Ambil email dari cookie jika ada
+        $rememberedEmail = Cookie::get('remembered_email');
+
+        return view('be.login', compact('rememberedEmail'));
     }
 
     public function process(Request $request)
@@ -23,9 +27,22 @@ class LoginController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+        // Logika Remember Me (Laravel Built-in)
+        $remember = $request->has('remember');
+
+        if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
-            return redirect()->route('dashboard');
+
+            // LOGIKA COOKIE UNTUK EMAIL:
+            if ($remember) {
+                // Simpan email selama 30 hari (43200 menit)
+                Cookie::queue('remembered_email', $request->email, 43200);
+            } else {
+                // Hapus cookie jika tidak dicentang
+                Cookie::queue(Cookie::forget('remembered_email'));
+            }
+
+            return redirect()->intended('dashboard');
         }
 
         return back()->withErrors([

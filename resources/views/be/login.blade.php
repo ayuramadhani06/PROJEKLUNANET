@@ -44,17 +44,26 @@
 
                   <label>Email</label>
                   <div class="mb-3">
-                    <input type="email" name="email" class="form-control" required>
+                    <input type="email" 
+                          name="email" 
+                          class="form-control" 
+                          placeholder="Email" 
+                          value="{{ old('email', $rememberedEmail ?? '') }}" 
+                          required>
                   </div>
 
                   <label>Password</label>
                   <div class="mb-3">
-                    <input type="password" name="password" class="form-control" required>
+                    <input type="password" name="password" class="form-control" placeholder="Password" required>
                   </div>
 
                   <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" name="remember">
-                    <label class="form-check-label">Remember me</label>
+                    <input class="form-check-input" 
+                          type="checkbox" 
+                          name="remember" 
+                          id="rememberMe" 
+                          {{ ($rememberedEmail || old('remember')) ? 'checked' : '' }}>
+                    <label class="form-check-label" for="rememberMe">Remember me</label>
                   </div>
                   <div class="text-center">
                     <button type="submit" class="btn bg-gradient-info w-100 mt-4">

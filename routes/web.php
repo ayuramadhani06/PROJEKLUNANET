@@ -7,7 +7,8 @@ use App\Http\Controllers\{
     TrafficFlowController,
     ProfileController,
     NotificationController,
-    ReportController
+    ReportController,
+    DnsController
 };
 
 // --- Halaman Public ---
@@ -33,5 +34,9 @@ Route::middleware(['auth'])->group(function () {
     // Mark as read
     Route::get('/notifications/read/{id}', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::get('/report/download', [App\Http\Controllers\ReportController::class, 'downloadPDF'])->name('report.pdf');
+
+    // DNS Logging
+   Route::get('/dnslogs', [DnsController::class, 'index'])->name('dns.index');
+   Route::get('/api/dns-data', [DnsController::class, 'api'])->name('dns.api');
 
 });
